@@ -1,0 +1,50 @@
+version: "3.1"
+
+intents:
+  - greet
+  - goodbye
+  - affirm
+  - deny
+  - mood_great
+  - mood_unhappy
+  - bot_challenge
+  - section_1_problem
+  - section_2_problem
+  - section_3_problem
+  - section_4_problem
+  - section_5_problem
+
+responses:
+  utter_greet:
+  - text: "Hey! How are you?"
+
+  utter_cheer_up:
+  - text: "Here is something to cheer you up:"
+    image: "https://i.imgur.com/nGF1K8f.jpg"
+
+  utter_did_that_help:
+  - text: "Did that help you?"
+
+  utter_happy:
+  - text: "Great, carry on!"
+
+  utter_goodbye:
+  - text: "Bye"
+
+  utter_iamabot:
+  - text: "I am a bot, powered by Rasa."
+
+  utter_section_1:
+    - text: "Вы выбрали Раздел 1: Организационные детали. Чем именно помочь?"
+  utter_section_2:
+    - text: "Раздел 2: Субъекты и подразделения. Поясните ваш вопрос?"
+  utter_section_3:
+    - text: "Раздел 3: Сбор и сортировка пластика. Что вызывает затруднение?"
+  utter_section_4:
+    - text: "Раздел 4: Утилизация и переработка. Чем помочь?"
+  utter_section_5:
+    - text: "Раздел 5: Альтернативы и сокращение пластика. В чем проблема?"
+
+session_config:
+  session_expiration_time: 60
+  carry_over_slots_to_new_session: true
