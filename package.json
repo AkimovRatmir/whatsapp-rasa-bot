@@ -1,8 +1,8 @@
 {
-  "name": "gpi-rassa",
+  "name": "whatsapp-rasa-bot",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "WhatsApp support bot: NestJS + Rasa NLU + MongoDB",
+  "author": "Ratmir Akimov",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {

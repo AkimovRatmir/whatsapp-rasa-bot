@@ -4,7 +4,7 @@ import { generateReply } from './utils/reply-generator';
 
 @Injectable()
 export class NlpService {
-  private rasaUrl = 'http://localhost:5005/model/parse';
+  private rasaUrl = process.env.RASA_URL ?? 'http://localhost:5005/model/parse';
 
   async parseMessage(message: string): Promise<{
     intent: string;

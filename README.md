@@ -1,98 +1,61 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# whatsapp-rasa-bot: a WhatsApp support bot with Rasa NLU
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A WhatsApp bot that understands free-text questions in Russian and routes users by topic. Messages
+come in through WhatsApp Web, a Rasa NLU model recognizes what the user wants, the bot replies, and
+each user's progress is saved in MongoDB.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+I built it in July 2025 as a prototype of a support assistant that guides people through a
+multi-step process, with questions like «у меня проблема со вторым разделом».
 
-## Description
+## How it works
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Project setup
-
-```bash
-$ npm install
+```
+WhatsApp user ──► whatsapp-web.js ──► NestJS ──► Rasa NLU (intent + confidence)
+                                        │
+                                        ├──► reply chosen by intent ──► WhatsApp
+                                        └──► MongoDB: which section this number is on
 ```
 
-## Compile and run the project
+- **WhatsApp channel** (`src/whatsapploc`): signs in to WhatsApp Web with a QR code shown in the
+  terminal, listens for messages, skips ignored numbers and answers in the same chat.
+- **NLU** (`src/nlp`): sends the text to the Rasa server's `/model/parse` endpoint and maps the
+  recognized intent to a reply.
+- **Rasa model** (`rasa-nlu/`): Russian training data for greetings, goodbyes, confirmations and
+  "problem with section 1–5" intents, plus stories, rules and test stories.
+- **User state** (`src/user`): when a message is about a specific section, the section is saved
+  against the user's phone number (Mongoose), so the conversation can continue from there.
+
+## Stack
+
+TypeScript · NestJS · whatsapp-web.js · Rasa 3 (Python) · MongoDB / Mongoose · Axios
+
+## Running it
+
+Requires Node.js 18+, Python 3.10 with Rasa, and MongoDB.
 
 ```bash
-# development
-$ npm run start
+# 1. Train and start the NLU server
+cd rasa-nlu
+python3.10 -m venv .venv && source .venv/bin/activate
+pip install rasa
+rasa train
+rasa run --enable-api        # http://localhost:5005
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+# 2. Start the bot (in another terminal)
+cd ..
+npm install
+cp .env.example .env         # MongoDB URL, Rasa URL, numbers to ignore
+set -a; source .env; set +a  # load the settings into the shell
+npm run start:dev            # scan the QR code with WhatsApp → Linked devices
 ```
 
-## Run tests
+The WhatsApp login is stored locally in `.wwebjs_auth/`. It's git-ignored on purpose: that folder
+gives access to the linked WhatsApp account.
 
-```bash
-# unit tests
-$ npm run test
+## Author
 
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+**Ratmir Akimov**: [github.com/AkimovRatmir](https://github.com/AkimovRatmir)
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+All rights reserved. The code is published for viewing only. See [LICENSE](LICENSE).

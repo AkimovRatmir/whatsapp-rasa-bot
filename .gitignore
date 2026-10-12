@@ -54,3 +54,12 @@ pids
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# WhatsApp Web login session — never commit, it grants access to the account
+.wwebjs_auth/
+.wwebjs_cache/
+
+# Rasa: virtualenv, cache and trained models (rebuilt with `rasa train`)
+rasa-nlu/.venv/
+rasa-nlu/.rasa/
+rasa-nlu/models/

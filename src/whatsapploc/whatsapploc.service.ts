@@ -8,7 +8,12 @@ import { UserService } from '../user/user.service';
 export class WhatsappService implements OnModuleInit {
   private client: Client;
 
-  private blockedNumbers: string[] = [];
+  // Numbers the bot ignores, from BLOCKED_NUMBERS=77001234567,77007654321
+  private blockedNumbers = (process.env.BLOCKED_NUMBERS ?? '')
+    .split(',')
+    .map((n) => n.trim())
+    .filter(Boolean)
+    .map((n) => (n.endsWith('@c.us') ? n : `${n}@c.us`));
 
   constructor(
     private readonly nlpService: NlpService,
